@@ -1,0 +1,8 @@
+name: astrbot_plugin_subagent_call
+display_name: 子代理呼叫
+desc: 角色扮演模式下用标签呼叫隔离子代理执行工具任务：清洗标签、保留上下文、回传结果并生成终稿。
+short_desc: 用标签把工具任务交给拥有完整工具与 Skill 的隔离子代理。
+version: v0.1.0
+author: iris1598
+repo: https://github.com/iris1598/astrbot_plugin_subagent_call
+astrbot_version: ">=4.23.1"

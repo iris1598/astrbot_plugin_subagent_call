@@ -1,0 +1,121 @@
+{
+  "enabled": {
+    "description": "启用子代理呼叫",
+    "type": "bool",
+    "hint": "关闭后本插件不注入规则、不检测标签，行为与未安装时一致。",
+    "default": true
+  },
+  "inject_rules": {
+    "description": "自动注入呼叫规则到系统提示词",
+    "type": "bool",
+    "default": true
+  },
+  "tag_rules": {
+    "description": "注入系统提示词的呼叫规则",
+    "type": "text",
+    "hint": "标签格式固定为 [呼叫名字:原因理由]，冒号前的内容不参与匹配，写什么都行。可用占位符 {example}、{name}。",
+    "default": "# 外部能力与子代理呼叫\n你没有函数调用（function calling）能力，无法直接使用任何工具，也不能联网、读写文件或执行代码。\n当任务确实需要这些外部能力时，不要编造结果，也不要假装已经完成，而是输出一个「呼叫标签」，把任务交给具备完整工具的隔离子代理去执行。\n\n标签格式（必须原样保留方括号、冒号与原因）：{example}\n\n规则：\n1. 仅在确实需要外部能力时输出标签；日常闲聊与角色扮演不要输出。\n2. 标签不会展示给用户。请在标签之外正常继续角色扮演的正文，正文会照常发给用户。\n3. 一次回复可以输出多个标签，每个单独占一行。\n4. 输出标签后请结束本轮正文；系统会把子代理的执行结果回传给你，你再据此生成面向用户的最终回复。\n5. 最终回复要保持你的人设与语气，自然地融入子代理的发现，但不要提及“标签”“系统”“子代理”“工具”等元信息，也不要再输出标签。\n",
+    "editor_mode": true
+  },
+  "subagent_name": {
+    "description": "子代理名字",
+    "type": "string",
+    "hint": "只用于渲染规则里的示例标签和启动提示，不影响标签识别。",
+    "default": "Iris"
+  },
+  "subagent_persona_id": {
+    "description": "子代理使用的人格",
+    "type": "string",
+    "hint": "选择 AstrBot 中已编辑好的人格作为子代理的人设。留空则不注入人格。",
+    "default": "",
+    "_special": "select_persona"
+  },
+  "subagent_provider_id": {
+    "description": "子代理使用的模型",
+    "type": "string",
+    "hint": "建议选择工具调用能力强的模型。留空则使用当前会话的默认模型。",
+    "default": "",
+    "_special": "select_provider"
+  },
+  "subagent_max_steps": {
+    "description": "子代理最大工具调用步数",
+    "type": "int",
+    "default": 15
+  },
+  "context_window": {
+    "description": "注入子代理的主对话最近消息条数",
+    "type": "int",
+    "hint": "0 表示不注入任何主对话上下文（此时建议保留历史查询工具）。",
+    "default": 6
+  },
+  "enable_history_tool": {
+    "description": "给子代理提供主对话历史查询工具",
+    "type": "bool",
+    "hint": "子代理在上下文不足时可以自己调用该工具向前翻页查看更早的对话。",
+    "default": true
+  },
+  "history_tool_max_messages": {
+    "description": "历史查询工具单次最多返回条数",
+    "type": "int",
+    "default": 40
+  },
+  "strip_media": {
+    "description": "转发上下文时剔除图片与语音",
+    "type": "bool",
+    "hint": "强烈建议保持开启。AstrBot 只在模型声明了 modalities 时才剔除多媒体，而历史里遗留的图片链接常常已经失效，直接转发给子代理会触发 invalid_image 之类的 400 错误。开启后用「[图片]」占位符替代。",
+    "default": true
+  },
+  "send_first_text": {
+    "description": "发送清洗标签后的第一段正文",
+    "type": "bool",
+    "hint": "关闭后用户只会看到启动提示与终稿。",
+    "default": true
+  },
+  "start_notice_enabled": {
+    "description": "发送子代理启动提示",
+    "type": "bool",
+    "default": true
+  },
+  "start_notice": {
+    "description": "启动提示文案",
+    "type": "string",
+    "hint": "可用占位符 {name}（子代理名字）。",
+    "default": "🔔 正在呼叫 {name}…"
+  },
+  "subagent_task_template": {
+    "description": "交给子代理的任务模板",
+    "type": "text",
+    "hint": "可用占位符 {reason}。",
+    "default": "你需要执行下面这个由主对话交给你的任务。\n<task>\n{reason}\n</task>\n\n要求：\n1. 需要事实、实时信息或外部操作时，主动调用你可用的工具，不要臆测或编造。\n2. 回复先给出结论性的结果，再补充必要的关键细节（数据、来源、路径等）。\n3. 你的输出会被回传给主对话模型，请不要复述这段任务说明。",
+    "editor_mode": true
+  },
+  "result_block_template": {
+    "description": "回传给主模型的结果块模板",
+    "type": "text",
+    "hint": "可用占位符 {reason}、{result}。",
+    "default": "<subagent_results>\n子代理已完成你呼叫的任务。\n任务：{reason}\n执行结果：\n{result}\n</subagent_results>\n\n请以上述结果为准，结合你的人设生成面向用户的最终回复：\n- 把结果自然地融入角色扮演，不要提及“标签”“系统”“子代理”“工具”等元信息。\n- 不要再输出任何呼叫标签。",
+    "editor_mode": true
+  },
+  "error_notice": {
+    "description": "呼叫失败时发给用户的提示",
+    "type": "string",
+    "hint": "子代理或终稿生成失败时替代原回复发出，避免把呼叫标签泄露给用户。清空则不发送。",
+    "default": "⚠️ 子代理执行失败，请稍后再试。"
+  },
+  "tool_call_timeout": {
+    "description": "子代理单次工具调用超时（秒）",
+    "type": "int",
+    "default": 120
+  },
+  "max_rounds": {
+    "description": "呼叫-终稿最大轮数",
+    "type": "int",
+    "hint": "1 表示终稿中若再次出现标签也不再继续呼叫（推荐）。",
+    "default": 1
+  },
+  "debug_log": {
+    "description": "输出调试日志",
+    "type": "bool",
+    "default": false
+  }
+}
